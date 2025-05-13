@@ -28,6 +28,92 @@ Result: {
 - **Optimized for Apple Silicon**: Works well on M-series Macs
 - **Docker Ready**: Easy deployment with Docker Compose
 - **Structured Output**: Clean JSON for easy integration
+- **Highly Adaptable**: Easily customizable for different domains beyond furniture
+
+## Adapting for Other Domains
+
+This service is designed to be easily adaptable to domains beyond furniture. You can repurpose it for any structured information extraction task with minimal changes:
+
+### 1. Update the System Prompt
+
+The domain-specific logic is contained in a single variable in `app.py`:
+
+```python
+# Change FURNITURE_PROMPT to match your domain (e.g., electronics, fashion, real estate)
+FURNITURE_PROMPT = """
+Parse this query exactly as described:
+
+EXACT QUERY MATCHES FIRST:
+- If query is "[your example]" RETURN {"attribute1": "value", "attribute2": "value"}
+
+GENERAL RULES (only if no exact match above):
+1. If query contains phrase "X" → attribute1 = "Y"
+2. If query contains phrase "Z" → attribute2 = "W"
+...
+"""
+```
+
+### 2. Modify the Response Model
+
+Update the `ParsedQuery` model in `app.py` to match your domain attributes:
+
+```python
+class ParsedQuery(BaseModel):
+    """Structured representation of your domain query."""
+    attribute1: Optional[str] = Field(None, description="Description of attribute1")
+    attribute2: Optional[str] = Field(None, description="Description of attribute2")
+    # Add or remove fields as needed
+```
+
+### 3. Adjust Edge Case Handling
+
+Update the `handle_edge_cases` function for your domain-specific patterns:
+
+```python
+def handle_edge_cases(query: str, parsed_response: dict) -> dict:
+    # Domain-specific edge case rules
+    if "specific pattern" in query.lower():
+        return {
+            "attribute1": "value1",
+            "attribute2": "value2"
+        }
+    return parsed_response
+```
+
+That's it! The core functionality – LLM integration, caching, API endpoints, and error handling – all remain unchanged.
+
+### Example: Adapting for Product Electronics
+
+Here's how you might adapt the service for electronics product queries:
+
+```python
+# New prompt for electronics
+ELECTRONICS_PROMPT = """
+Parse this electronics query exactly as described:
+
+EXACT QUERY MATCHES FIRST:
+- If query is "high-performance gaming laptop with 16GB RAM" RETURN {"product_type": "laptop", "category": "gaming", "memory": "16GB", "priority": "performance"}
+- If query is "budget-friendly smartphone with good camera" RETURN {"product_type": "smartphone", "price_range": "budget", "priority": "camera"}
+
+GENERAL RULES (only if no exact match above):
+1. If query contains "laptop", "notebook", or "macbook" → product_type = "laptop"
+2. If query contains "phone", "smartphone" or "iphone" → product_type = "smartphone"
+3. If query contains "gaming" → category = "gaming"
+4. If query contains "budget" or "affordable" → price_range = "budget"
+...
+"""
+
+# Updated response model
+class ParsedQuery(BaseModel):
+    """Structured representation of an electronics query."""
+    product_type: Optional[str] = Field(None, description="The type of electronic product")
+    category: Optional[str] = Field(None, description="Product category or use case")
+    price_range: Optional[str] = Field(None, description="Indicated price range")
+    memory: Optional[str] = Field(None, description="Memory/RAM specification")
+    priority: Optional[str] = Field(None, description="Main feature priority for the user")
+```
+
+The same approach can be applied to any domain where structured information extraction from natural language is needed.
 
 ## License
 
