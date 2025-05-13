@@ -3,7 +3,7 @@ import redis
 import os
 import time
 from typing import Optional, Dict, Any
-from llm_query_understand.logging_config import get_logger
+from llm_query_understand.utils.logging_config import get_logger
 
 # Get the configured logger
 logger = get_logger()

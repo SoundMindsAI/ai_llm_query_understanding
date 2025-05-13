@@ -1,54 +1,86 @@
 # LLM Query Understanding Service
 
-This project implements a query understanding service powered by Large Language Models (LLMs), following the tutorial at [softwaredoug.com](https://softwaredoug.com/blog/2025/04/08/llm-query-understand).
+A lightweight API service that transforms natural language furniture queries into structured JSON data using a small, efficient Large Language Model.
 
-## Table of Contents
+![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![Python](https://img.shields.io/badge/python-3.8%2B-green)
+![License](https://img.shields.io/badge/license-MIT-orange)
 
-- [Overview](#overview)
-- [Model Selection](#model-selection)
-- [System Prompt](#system-prompt)
-- [Key Features](#key-features)
-- [Architecture](#architecture)
-  - [System Architecture Diagram](#system-architecture-diagram)
-  - [Request Processing Flow](#request-processing-flow)
-- [Dependencies](#dependencies)
-  - [Core Dependencies](#core-dependencies)
-  - [Additional Dependencies](#additional-dependencies)
-- [FastAPI in Detail](#fastapi-in-detail)
-- [Uvicorn in Detail](#uvicorn-in-detail)
-- [Local Setup](#local-setup)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-  - [Running Locally](#running-locally)
-- [Docker Deployment](#docker-deployment)
-  - [Prerequisites](#prerequisites-1)
-  - [Using Docker Compose](#using-docker-compose)
-  - [Managing Docker Compose Containers](#managing-docker-compose-containers)
-  - [Building the Docker Image Manually](#building-the-docker-image-manually)
-  - [Managing Individual Docker Containers](#managing-individual-docker-containers)
-  - [Docker Startup Process](#docker-startup-process)
-  - [Docker Troubleshooting](#docker-troubleshooting)
-  - [Docker Image Optimization](#docker-image-optimization)
-- [Deployment to Kubernetes](#deployment-to-kubernetes)
-- [Startup Process](#startup-process)
-- [Troubleshooting](#troubleshooting)
-  - [Model Offloading Error](#model-offloading-error)
-  - [Other Common Issues](#other-common-issues)
-- [Debugging and Logging](#debugging-and-logging)
-  - [Logging Configuration](#logging-configuration)
-  - [Log Categories](#log-categories)
-  - [Performance Monitoring](#performance-monitoring)
-- [API Usage](#api-usage)
-  - [Root Endpoint](#root-endpoint)
-  - [Health Check Endpoint](#health-check-endpoint)
-  - [API Documentation Endpoints](#api-documentation-endpoints)
-  - [Query Understanding Endpoint](#query-understanding-endpoint)
-  - [Response Fields](#response-fields)
-- [Project Structure](#project-structure)
-- [Project Files in Detail](#project-files-in-detail)
-  - [Entry Point](#entry-point)
-  - [Core Components](#core-components)
-  - [Configuration Files](#configuration-files)
+## Quick Example
+
+```
+Query: "blue metal dining table"
+
+Result: {
+  "item_type": "dining table",
+  "material": "metal",
+  "color": "blue"
+}
+```
+
+## Features
+
+- **Lightweight API**: Built with FastAPI for high performance
+- **Small LLM**: Uses Qwen2-0.5B-Instruct (only ~1.5GB in memory)
+- **Intelligent Caching**: Redis integration for repeated queries
+- **Optimized for Apple Silicon**: Works well on M-series Macs
+- **Docker Ready**: Easy deployment with Docker Compose
+- **Structured Output**: Clean JSON for easy integration
+
+## Documentation
+
+We've organized documentation into focused, topic-based files:
+
+- **[Getting Started Guide](./docs/guides/getting-started.md)**: Quick setup and installation
+- **[API Reference](./docs/api/README.md)**: Endpoint documentation and examples
+- **[Development Guide](./docs/development/README.md)**: Contributing and code standards
+- **[Deployment Guide](./docs/deployment/README.md)**: Production deployment options
+
+## Quick Start
+
+### Installation
+
+```bash
+# Install the package
+pip install -e .
+
+# Start the server
+python scripts/start_server.py
+```
+
+### Testing the API
+
+```bash
+# Health check
+curl http://localhost:8000/health
+
+# Parse a furniture query
+curl -X POST -H "Content-Type: application/json" \
+  -d '{"query":"blue metal dining table"}' \
+  http://localhost:8000/parse
+```
+
+## Project Structure
+
+```
+ai_llm_query_understanding/
+├── llm_query_understand/     # Main package
+│   ├── api/                  # API components
+│   ├── core/                 # Core functionality (LLM, cache)
+│   └── utils/                # Utilities
+├── scripts/                  # Entry point scripts
+├── tests/                    # Test suite
+├── docs/                     # Documentation
+└── setup.py                  # Package installation
+```
+
+## License
+
+MIT
+
+## Acknowledgements
+
+Based on the tutorial at [softwaredoug.com](https://softwaredoug.com/blog/2025/04/08/llm-query-understand).
 - [Performance Considerations](#performance-considerations)
 - [Important Notes](#important-notes)
 

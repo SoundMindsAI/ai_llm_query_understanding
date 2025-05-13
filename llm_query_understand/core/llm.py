@@ -1,17 +1,15 @@
-from transformers import AutoTokenizer, AutoModelForCausalLM
-import torch
 import os
+import torch
+from transformers import AutoTokenizer, AutoModelForCausalLM
 import time
 import gc  # For garbage collection to free memory
-from llm_query_understand.logging_config import get_logger
+from llm_query_understand.utils.logging_config import get_logger
 
 # Get the configured logger
 logger = get_logger()
 
-# Determine the device to use (CUDA, MPS, or CPU)
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else 
-                     "mps" if torch.backends.mps.is_available() else 
-                     "cpu")
+# Default to using CPU with int8 quantization as recommended in README
+# Let device_map='auto' handle optimal device placement
 
 # Default model - use a smaller model for CPU
 DEFAULT_MODEL = "Qwen/Qwen2-0.5B-Instruct"
@@ -21,16 +19,15 @@ class LargeLanguageModel:
     A wrapper class for interacting with transformer-based language models.
     """
 
-    def __init__(self, device=DEVICE, model=DEFAULT_MODEL):
+    def __init__(self, model=DEFAULT_MODEL):
         """
-        Initialize the language model with the specified device and model.
+        Initialize the language model with the specified model.
+        The device is managed automatically via device_map='auto'.
         
         Args:
-            device: The device to run the model on (cuda, mps, or cpu)
             model: The model identifier to load from Hugging Face
         """
-        self.device = device
-        logger.info(f"Initializing LLM with model={model} on device={device}")
+        logger.info(f"Initializing LLM with model={model} using device_map='auto'")
         
         try:
             # Initialize tokenizer with proper padding settings
@@ -51,15 +48,25 @@ class LargeLanguageModel:
             logger.info(f"Loading model {model}, this may take several minutes...")
             start_time = time.time()
             
-            # For CPU inference, use int8 quantization for better performance
-            dtype = torch.int8 if device == "cpu" else torch.float16
-            
-            self.model = AutoModelForCausalLM.from_pretrained(
-                model,
-                torch_dtype=dtype,
-                device_map="auto",
-                low_cpu_mem_usage=True    # Enable low CPU memory usage
-            )
+            # Check for MPS (Apple Silicon) availability and handle differently
+            # to avoid the "Placeholder storage has not been allocated on MPS device!" error
+            if torch.backends.mps.is_available():
+                logger.info("Apple Silicon (MPS) detected, using CPU device for compatibility")
+                # On Apple Silicon, force CPU usage to avoid MPS device errors
+                self.model = AutoModelForCausalLM.from_pretrained(
+                    model,
+                    device_map="cpu",      # Force CPU to avoid MPS issues
+                    low_cpu_mem_usage=True # Enable low CPU memory usage
+                )
+                self.device = "cpu"
+            else:
+                # For other devices, use standard approach with auto device mapping
+                self.model = AutoModelForCausalLM.from_pretrained(
+                    model,
+                    device_map="auto",     # Let the library handle optimal device placement
+                    low_cpu_mem_usage=True # Enable low CPU memory usage
+                )
+                self.device = "cuda" if torch.cuda.is_available() else "cpu"
             load_time = time.time() - start_time
             logger.info(f"Model loaded in {load_time:.2f} seconds")
             
@@ -101,12 +108,21 @@ class LargeLanguageModel:
             token_count = inputs["input_ids"].shape[1]
             logger.debug(f"Input token count: {token_count}")
             
-            # For inputs that need to be on the same device as the model's first layer,
-            # we detect and move only if necessary
-            if hasattr(self.model, 'hf_device_map') and 'model.embed_tokens' in self.model.hf_device_map:
+            # Handle input tensor device placement based on our configuration
+            # This fixes issues with MPS devices on Apple Silicon
+            if hasattr(self, 'device'):
+                # Use the device we explicitly set during initialization
+                logger.debug(f"Moving input tensors to {self.device} device")
+                inputs = {k: v.to(self.device) for k, v in inputs.items()}
+            elif hasattr(self.model, 'hf_device_map') and 'model.embed_tokens' in self.model.hf_device_map:
+                # Fallback to device map if available
                 embed_device = self.model.hf_device_map['model.embed_tokens']
                 logger.debug(f"Moving input tensors to {embed_device} device")
                 inputs = {k: v.to(embed_device) for k, v in inputs.items()}
+            else:
+                # Last resort - move to CPU
+                logger.debug("No device mapping found, using CPU")
+                inputs = {k: v.to('cpu') for k, v in inputs.items()}
             
             # Use generate with proper parameters to avoid conflicts
             logger.debug(f"Starting text generation with max_new_tokens={max_new_tokens}")

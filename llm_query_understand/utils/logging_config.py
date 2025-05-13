@@ -5,7 +5,7 @@ Provides structured JSON logging with configurable log levels.
 import os
 import sys
 import logging
-from pythonjsonlogger import jsonlogger
+from pythonjsonlogger import json as jsonlogger  # Updated import to fix deprecation warning
 
 # Default log level can be overridden by environment variable
 DEFAULT_LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO").upper()

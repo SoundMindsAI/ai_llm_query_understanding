@@ -1,0 +1,54 @@
+# SoundMindsAI Query Understanding Service Rules
+
+# Code Quality and Standards
+- Follow PEP 8 style guidelines for Python code
+- Maintain comprehensive docstrings for all functions and classes
+- Keep functions small and focused on a single responsibility
+- Use type hints for all function parameters and return values
+- Write unit tests for all core functionality
+
+# Model Management
+- Prefer smaller models (Qwen2-0.5B-Instruct) over larger models when possible
+- Always quantize models for production to improve performance
+- Cache model weights locally to improve startup time
+- Benchmark model performance before making changes
+
+# API Development
+- Use FastAPI for all HTTP endpoints
+- Follow RESTful API design principles
+- Validate all input data using Pydantic models
+- Include appropriate error handling and status codes
+- Document all endpoints with OpenAPI comments
+
+# Performance Optimization
+- Use Redis caching for all LLM queries
+- Log performance metrics for model loading and inference
+- Optimize prompts for better LLM performance
+- Consider response time in all optimizations
+
+# Docker and Deployment
+- Keep Docker images small and efficient
+- Use multi-stage builds when appropriate
+- Include health checks in all containerized services
+- Configure appropriate resource limits
+- Store sensitive configuration in environment variables, not code
+
+# Logging and Monitoring
+- Use structured JSON logging in production
+- Log all API requests and responses (excluding sensitive data)
+- Include timing information for performance monitoring
+- Set appropriate log levels based on environment
+
+# Development Workflow
+- Use feature branches for all changes
+- Run tests locally before committing
+- Document all significant changes
+- Keep the README up to date
+- Regularly update dependencies
+
+# Security
+- Never commit API keys or credentials
+- Validate and sanitize all user inputs
+- Use HTTPS for all production endpoints
+- Implement rate limiting for API endpoints
+- Regularly update dependencies for security patches
