@@ -29,6 +29,12 @@ Result: {
 - **Docker Ready**: Easy deployment with Docker Compose
 - **Structured Output**: Clean JSON for easy integration
 
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+The MIT License is a permissive license that allows anyone to use, modify, distribute, and even use the code commercially with minimal restrictions. You are free to use this code for any purpose without any conditions, including removing the copyright notice or attribution.
+
 ## Documentation
 
 We've organized documentation into focused, topic-based files:
