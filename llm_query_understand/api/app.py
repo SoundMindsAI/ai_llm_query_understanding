@@ -38,6 +38,13 @@ app = FastAPI(
     openapi_url="/openapi.json"
 )
 
+# Import the logging middleware
+from llm_query_understand.api.middleware import RequestLoggingMiddleware, ResponseTimeHeaderMiddleware
+
+# Add middleware for request logging and performance tracking
+app.add_middleware(RequestLoggingMiddleware, exclude_paths=["/health", "/docs", "/redoc", "/openapi.json"])
+app.add_middleware(ResponseTimeHeaderMiddleware)
+
 # Enable CORS for cross-origin requests
 app.add_middleware(
     CORSMiddleware,
