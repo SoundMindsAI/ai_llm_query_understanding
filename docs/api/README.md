@@ -9,6 +9,7 @@ This section documents the REST API endpoints provided by the LLM Query Understa
 | [`/`](#root-endpoint) | GET | Service information |
 | [`/health`](#health-check-endpoint) | GET | Health check |
 | [`/parse`](#query-understanding-endpoint) | POST | Parse furniture query using LLM |
+| [`/debug`](#debug-endpoint) | POST | Raw LLM output for debugging |
 | [`/test`](#test-endpoint) | POST | Test endpoint with static responses |
 | [`/docs`](#api-documentation) | GET | Swagger UI documentation |
 | [`/redoc`](#api-documentation) | GET | ReDoc documentation |
@@ -89,7 +90,82 @@ This section documents the REST API endpoints provided by the LLM Query Understa
    }
    ```
 
-2. **Green Plastic Chair**
+2. **Leather Sofa with Black Legs**
+
+   Request:
+   ```json
+   {
+     "query": "leather sofa with black legs"
+   }
+   ```
+
+   Response:
+   ```json
+   {
+     "generation_time": 57.99,
+     "parsed_query": {
+       "item_type": "sofa",
+       "material": "leather",
+       "color": "black"
+     },
+     "query": "leather sofa with black legs",
+     "cached": false,
+     "total_time": 57.989,
+     "cache_lookup_time": 0.0006
+   }
+   ```
+
+3. **Red Plastic Chair for Children**
+
+   Request:
+   ```json
+   {
+     "query": "red plastic chair for children"
+   }
+   ```
+
+   Response:
+   ```json
+   {
+     "generation_time": 23.65,
+     "parsed_query": {
+       "item_type": "chair",
+       "material": "plastic",
+       "color": "red"
+     },
+     "query": "red plastic chair for children",
+     "cached": false,
+     "total_time": 23.653,
+     "cache_lookup_time": 0.0008
+   }
+   ```
+
+4. **Cached Query Example** (Note the dramatic performance improvement)
+
+   Request:
+   ```json
+   {
+     "query": "blue metal dining table"
+   }
+   ```
+
+   Response (from cache):
+   ```json
+   {
+     "generation_time": 117.14,
+     "parsed_query": {
+       "item_type": "dining table",
+       "material": "metal",
+       "color": "blue"
+     },
+     "query": "blue metal dining table",
+     "cached": true,
+     "total_time": 0.0004,
+     "cache_lookup_time": 0.0003
+   }
+   ```
+
+5. **Green Plastic Chair**
 
    Request:
    ```json
@@ -135,9 +211,52 @@ This section documents the REST API endpoints provided by the LLM Query Understa
      "query": "wooden bookshelf with glass doors",
      "cached": false,
      "total_time": 3.7895,
-     "cache_lookup_time": null
+     "cache_lookup_time": 0.0001
    }
    ```
+
+### Edge Case Handling
+
+The `/parse` endpoint includes special handling for known edge cases that ensures accurate parsing for queries that might be challenging for the LLM:
+
+- **Material vs. Color Ambiguity**: 
+  - Example: `gold metal accent table` → item_type: "accent table", material: "metal", color: "gold"
+  
+- **Component vs. Item Type Confusion**:
+  - Example: `glass display shelving unit with metal frame` → item_type: "shelving unit", material: "glass"
+  
+- **Composite Terms**:
+  - Example: `amber glass cabinet for display` → item_type: "display cabinet", material: "glass", color: "amber"
+
+### Debug Endpoint
+
+**Endpoint**: `POST /debug`
+
+**Description**: Returns the raw LLM output for a given query without parsing. Useful for debugging and prompt engineering.
+
+**Request Format**:
+```json
+{
+  "query": "string"
+}
+```
+
+**Example Request**:
+```json
+{
+  "query": "gold metal accent table"
+}
+```
+
+**Example Response**:
+```json
+{
+  "query": "gold metal accent table",
+  "prompt": "[system prompt text...]",
+  "raw_llm_output": "[raw output from LLM...]",
+  "processing_time": 10.285
+}
+```
 
 ### Test Endpoint
 

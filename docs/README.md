@@ -8,6 +8,7 @@ This directory contains the official documentation for the LLM Query Understandi
 - **[API Reference](./api/README.md)**: Detailed API endpoint documentation
 - **[Development Guide](./development/README.md)**: Development workflow and practices
 - **[Deployment Guide](./deployment/README.md)**: Deployment options and configuration
+- **[Testing Results](./testing/query_understanding_test_results.md)**: Detailed analysis of query understanding performance
 
 ## Project Overview
 

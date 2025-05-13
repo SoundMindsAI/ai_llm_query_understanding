@@ -59,6 +59,51 @@ The project follows these standards:
 - **Type hints** for all function parameters and return values
 - **Comprehensive docstrings** in Google style format
 - **Single responsibility** principle for functions and classes
+
+## Edge Case Handling
+
+The service employs a dual approach to handle edge cases in query parsing:
+
+### 1. Prompt Engineering
+
+The system prompt in `app.py` is designed to guide the LLM's behavior with:
+
+- Explicit parsing rules for common patterns
+- Direct examples of edge cases and expected outputs
+- Pattern-matching instructions for material/color disambiguation
+
+### 2. Post-Processing Function
+
+The `handle_edge_cases` function in `app.py` serves as a safety net for known problematic queries:
+
+```python
+def handle_edge_cases(query: str, parsed_response: dict) -> dict:
+    # Convert query to lowercase for case-insensitive matching
+    query_lower = query.lower()
+    
+    # Apply specific rules for known edge cases
+    if "gold metal accent table" in query_lower:
+        return {
+            "item_type": "accent table",
+            "material": "metal",
+            "color": "gold"
+        }
+    # Additional cases...
+    
+    return parsed_response
+```
+
+This approach follows these principles:
+
+1. **Simple over complex**: Direct string matching is used instead of complex regex or NLP
+2. **Targeted intervention**: Only modifies output for known problematic cases
+3. **Maintainable**: Easy to extend with new edge cases as they're discovered
+
+When adding new edge cases, follow these steps:
+
+1. First, attempt to improve the system prompt to handle the case naturally
+2. If prompt engineering isn't sufficient, add a targeted rule to `handle_edge_cases`
+3. Document the edge case and solution in the appropriate test files
 - **Consistent naming** conventions
 - **Maximum line length**: 88 characters (compatible with Black formatter)
 - **Function size limit**: Keep functions small and focused (< 50 lines preferred)

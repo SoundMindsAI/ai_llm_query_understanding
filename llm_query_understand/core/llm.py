@@ -132,7 +132,9 @@ class LargeLanguageModel:
                 attention_mask=inputs["attention_mask"],
                 max_new_tokens=max_new_tokens,  # Use max_new_tokens instead of max_length
                 pad_token_id=self.tokenizer.pad_token_id,
-                do_sample=False  # Deterministic generation
+                do_sample=True,  # Enable sampling for more diverse outputs
+                temperature=0.7,  # Moderate temperature for balanced creativity/coherence
+                top_p=0.9  # Nucleus sampling to focus on more reasonable options
             )
             
             # Log generation performance metrics

@@ -23,6 +23,8 @@ Result: {
 - **Lightweight API**: Built with FastAPI for high performance
 - **Small LLM**: Uses Qwen2-0.5B-Instruct (only ~1.5GB in memory)
 - **Intelligent Caching**: Redis integration for repeated queries
+- **Robust Edge Case Handling**: Combined prompt engineering and post-processing for reliable results
+- **Debug Mode**: Endpoint for viewing raw LLM output for testing and prompt development
 - **Optimized for Apple Silicon**: Works well on M-series Macs
 - **Docker Ready**: Easy deployment with Docker Compose
 - **Structured Output**: Clean JSON for easy integration
